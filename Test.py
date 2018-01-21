@@ -39,7 +39,8 @@ ytest[np.arange(len(ytestt)), ytestt] = 1
 #Parameters of neural network
 features = len(selectedFeatures)
 output_size = 2
-first_hidden_layer_size = int((len(selectedFeatures) + output_size) / 2)
+first_hidden_layer_size = int(((len(selectedFeatures) + output_size) ) / 3)
+second_hidden_layer_size = int(((len(selectedFeatures) + output_size) ) / 3)
 learning_rate = 0.1
 epochs = 1000
 
@@ -50,19 +51,25 @@ x = tf.placeholder(tf.float32, [None, features])
 W1 = tf.Variable(tf.random_normal([features, first_hidden_layer_size]))
 b1 = tf.Variable(tf.random_normal([first_hidden_layer_size]))
 z1 = tf.matmul(x, W1) + b1
-y1 = tf.nn.relu(z1)
+y1 = tf.nn.sigmoid(z1)
+
+#Second Hidden Layer
+W2 = tf.Variable(tf.random_normal([first_hidden_layer_size, second_hidden_layer_size]))
+b2 = tf.Variable(tf.random_normal([second_hidden_layer_size]))
+z2 = tf.matmul(y1, W2) + b2
+y2 = tf.nn.sigmoid(z2)
 
 #Output Layer
-W2 = tf.Variable(tf.random_normal([first_hidden_layer_size, output_size]))
-b2 = tf.Variable(tf.random_normal([output_size]))
-z2 = tf.matmul(y1, W2) + b2
-y2 = tf.nn.softmax(z2)
+W3 = tf.Variable(tf.random_normal([second_hidden_layer_size, output_size]))
+b3 = tf.Variable(tf.random_normal([output_size]))
+z3 = tf.matmul(y2, W3) + b3
+y3 = tf.nn.softmax(z3)
 
 #Labels
 y_ = tf.placeholder(tf.float32, [None, 2])
 
 #Cost function
-cost = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y2), [1]))
+cost = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y3), [1]))
 
 #Training
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cost)
@@ -76,16 +83,18 @@ for _ in range(epochs):
     sess.run(train_step, feed_dict={x:X, y_:Y})
 
 #Obtain accuracy score
-correct_prediction = tf.equal(tf.arg_max(y2, 1), tf.arg_max(y_, 1))
+correct_prediction = tf.equal(tf.argmax(y3, 1), tf.argmax(y_, 1))
 
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-one, two, three = sess.run([accuracy, y_, y2], feed_dict={x:xtest, y_:pd.DataFrame(ytest)})
+one, two, three = sess.run([accuracy, y_, y3], feed_dict={x:xtest, y_:pd.DataFrame(ytest)})
 
-print(one)
+print("Accuracy: " + str(round(one * 100)) + " %")
 
+print("\nActual:-")
 print(two)
 
+print("\nPredicted:-")
 print(np.rint(three))
 
 
