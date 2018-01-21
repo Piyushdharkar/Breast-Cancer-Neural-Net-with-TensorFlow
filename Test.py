@@ -1,7 +1,8 @@
 import tensorflow as tf
 import pandas as pd
 from sklearn.cross_validation import train_test_split
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import normalize
+import numpy as np
 
 originalDataset = pd.read_csv('data.csv')
 dataset = originalDataset.drop('Unnamed: 32', axis=1)
@@ -20,16 +21,24 @@ selectedFeatures = ['concave points_worst', 'perimeter_worst',
                     'compactness_mean', 'compactness_worst']
 dataset = dataset[selectedFeatures + ['diagnosis']]
 
+dataset[selectedFeatures] = normalize(dataset[selectedFeatures])
+
 
 #Train Test Split
-xtrain, xtest, ytrain, ytest = train_test_split(dataset.drop('diagnosis', axis=1),
+xtrain, xtest, ytraint, ytestt = train_test_split(dataset.drop('diagnosis', axis=1),
                                 dataset['diagnosis'])
 
+ytrain =  np.zeros((len(ytraint), 2))
+ytest = np.zeros((len(ytestt), 2))
 
-features = 14
-first_hidden_layer_size = 8
-output_size = 1
-learning_rate = 0.8
+ytrain[np.arange(len(ytraint)), ytraint] = 1
+ytest[np.arange(len(ytestt)), ytestt] = 1
+
+
+features = len(selectedFeatures)
+output_size = 2
+first_hidden_layer_size = int((len(selectedFeatures) + output_size) / 2)
+learning_rate = 0.1
 epochs = 1000
 
 #Input Layer
@@ -39,7 +48,7 @@ x = tf.placeholder(tf.float32, [None, features])
 W1 = tf.Variable(tf.random_normal([features, first_hidden_layer_size]))
 b1 = tf.Variable(tf.random_normal([first_hidden_layer_size]))
 z1 = tf.matmul(x, W1) + b1
-y1 = tf.nn.softmax(z1)
+y1 = tf.nn.sigmoid(z1)
 
 #Output Layer
 W2 = tf.Variable(tf.random_normal([first_hidden_layer_size, output_size]))
@@ -48,7 +57,7 @@ z2 = tf.matmul(y1, W2) + b2
 y2 = tf.nn.softmax(z2)
 
 #Labels
-y_ = tf.placeholder(tf.float32, [None, 1])
+y_ = tf.placeholder(tf.float32, [None, 2])
 
 #Cost function
 #cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y2, labels=output))
@@ -66,7 +75,7 @@ for _ in range(epochs):
     sess.run(train_step, feed_dict={x:X, y_:Y})
 
 
-correct_prediction = tf.equal(y2, y_)
+correct_prediction = tf.equal(tf.arg_max(y2, 1), tf.arg_max(y_, 1))
 
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
@@ -76,7 +85,7 @@ print(one)
 
 print(two)
 
-print(three)
+print(np.rint(three))
 
 
 
