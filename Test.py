@@ -20,6 +20,20 @@ dataset = dataset[selectedFeatures + ['diagnosis']]
 
 
 
+features = 13
+first_hidden_layer_size = 4
+
+
+x = tf.placeholder(tf.float32, [None, features])
+
+
+#Input Layer
+W1 = tf.Variable(tf.random_normal([features, first_hidden_layer_size]))
+b1 = tf.Variable(tf.random_normal([first_hidden_layer_size]))
+z1 = tf.matmul(x, W1) + b1
+y1 = tf.nn.relu(z1)
+
+
 
 
 
