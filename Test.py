@@ -50,7 +50,7 @@ x = tf.placeholder(tf.float32, [None, features])
 W1 = tf.Variable(tf.random_normal([features, first_hidden_layer_size]))
 b1 = tf.Variable(tf.random_normal([first_hidden_layer_size]))
 z1 = tf.matmul(x, W1) + b1
-y1 = tf.nn.sigmoid(z1)
+y1 = tf.nn.relu(z1)
 
 #Output Layer
 W2 = tf.Variable(tf.random_normal([first_hidden_layer_size, output_size]))
