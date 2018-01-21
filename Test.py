@@ -28,13 +28,14 @@ dataset[selectedFeatures] = normalize(dataset[selectedFeatures])
 xtrain, xtest, ytraint, ytestt = train_test_split(dataset.drop('diagnosis', axis=1),
                                 dataset['diagnosis'])
 
+#Conversion to one hot vector
 ytrain =  np.zeros((len(ytraint), 2))
 ytest = np.zeros((len(ytestt), 2))
 
 ytrain[np.arange(len(ytraint)), ytraint] = 1
 ytest[np.arange(len(ytestt)), ytestt] = 1
 
-
+#Parameters of neural network
 features = len(selectedFeatures)
 output_size = 2
 first_hidden_layer_size = int((len(selectedFeatures) + output_size) / 2)
@@ -60,7 +61,6 @@ y2 = tf.nn.softmax(z2)
 y_ = tf.placeholder(tf.float32, [None, 2])
 
 #Cost function
-#cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y2, labels=output))
 cost = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y2), [1]))
 
 #Training
@@ -74,7 +74,7 @@ X, Y = xtrain, pd.DataFrame(ytrain)
 for _ in range(epochs):
     sess.run(train_step, feed_dict={x:X, y_:Y})
 
-
+#Obtain accuracy score
 correct_prediction = tf.equal(tf.arg_max(y2, 1), tf.arg_max(y_, 1))
 
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
