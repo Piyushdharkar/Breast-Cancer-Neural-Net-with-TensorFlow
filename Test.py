@@ -42,7 +42,7 @@ output_size = 2
 first_hidden_layer_size = int(((len(selectedFeatures) + output_size) ) / 3)
 second_hidden_layer_size = int(((len(selectedFeatures) + output_size) ) / 3)
 learning_rate = 0.1
-epochs = 1000
+epochs = 2000
 
 #Input Layer
 x = tf.placeholder(tf.float32, [None, features])
@@ -51,13 +51,13 @@ x = tf.placeholder(tf.float32, [None, features])
 W1 = tf.Variable(tf.random_normal([features, first_hidden_layer_size]))
 b1 = tf.Variable(tf.random_normal([first_hidden_layer_size]))
 z1 = tf.matmul(x, W1) + b1
-y1 = tf.nn.sigmoid(z1)
+y1 = tf.nn.tanh(z1)
 
 #Second Hidden Layer
 W2 = tf.Variable(tf.random_normal([first_hidden_layer_size, second_hidden_layer_size]))
 b2 = tf.Variable(tf.random_normal([second_hidden_layer_size]))
 z2 = tf.matmul(y1, W2) + b2
-y2 = tf.nn.sigmoid(z2)
+y2 = tf.nn.tanh(z2)
 
 #Output Layer
 W3 = tf.Variable(tf.random_normal([second_hidden_layer_size, output_size]))
